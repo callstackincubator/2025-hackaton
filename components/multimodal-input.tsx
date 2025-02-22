@@ -22,13 +22,13 @@ import { toast } from 'sonner';
 import { useLocalStorage, useWindowSize } from 'usehooks-ts';
 
 import { sanitizeUIMessages } from '@/lib/utils';
-
+import { KeyboardIcon, X as XIcon } from 'lucide-react';
 import { ArrowUpIcon, PaperclipIcon, StopIcon } from './icons';
 import { PreviewAttachment } from './preview-attachment';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
-import { SuggestedActions } from './suggested-actions';
 import equal from 'fast-deep-equal';
+import { ListeningMicButton } from './ui/new-chat-button';
 
 function PureMultimodalInput({
   chatId,
@@ -65,6 +65,7 @@ function PureMultimodalInput({
   ) => void;
   className?: string;
 }) {
+  const [isInputVisible, setIsInputVisible] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
 
@@ -198,9 +199,29 @@ function PureMultimodalInput({
       {messages.length === 0 &&
         attachments.length === 0 &&
         uploadQueue.length === 0 && (
-          <SuggestedActions append={append} chatId={chatId} />
+          <ListeningMicButton append={append} chatId={chatId} />
         )}
 
+        <Button
+          className="rounded-full p-3 shadow-lg w-[50px] h-[50px] flex items-center justify-center"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsInputVisible((prev) => !prev);
+          }}
+          type="button"
+          variant="default"
+        >
+          {isInputVisible ? (
+            <XIcon size={20} />
+          ) : (
+            <KeyboardIcon size={20} />
+          )}
+        </Button>
+      {isInputVisible && (
+        <>
+        
+      
       <input
         type="file"
         className="fixed -top-4 -left-4 size-0.5 opacity-0 pointer-events-none"
@@ -269,6 +290,10 @@ function PureMultimodalInput({
           />
         )}
       </div>
+        </>
+        
+      )}
+
     </div>
   );
 }

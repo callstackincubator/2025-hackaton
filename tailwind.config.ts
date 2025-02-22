@@ -70,6 +70,32 @@ const config: Config = {
           ring: 'hsl(var(--sidebar-ring))',
         },
       },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "ping-slow": {
+          "75%, 100%": {
+            transform: "scale(1.5)",
+            opacity: "0",
+          },
+        },
+        equalizer: {
+          "0%, 100%": { height: "10%" },
+          "50%": { height: "100%" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        "ping-slow": "ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite",
+        equalizer: "equalizer 2s ease-in-out infinite",
+      },
     },
   },
   plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
