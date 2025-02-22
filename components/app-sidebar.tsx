@@ -18,6 +18,7 @@ import {
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import Image from 'next/image';
+import { Settings } from 'lucide-react';
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
@@ -60,7 +61,21 @@ export function AppSidebar({ user }: { user: User | undefined }) {
       <SidebarContent>
         <SidebarHistory user={user} />
       </SidebarContent>
-      <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
+      <SidebarFooter>{user && (
+        <>
+          <SettingsButton />
+          <SidebarUserNav user={user} />
+        </>
+      )}</SidebarFooter>
     </Sidebar>
+  );
+}
+
+function SettingsButton() {
+  return (
+    <Link href="/settings" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 text-sm font-medium py-2 px-3 rounded-lg hover:bg-gray-100 transition-colors">
+      <Settings className="w-4 h-4" />
+      <span>Settings</span>
+    </Link>
   );
 }
