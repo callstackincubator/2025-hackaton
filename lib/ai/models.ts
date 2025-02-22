@@ -3,11 +3,11 @@ import {
   customProvider,
 } from 'ai';
 import { mistral } from '@ai-sdk/mistral';
-export const DEFAULT_CHAT_MODEL: string = 'chat-model-small';
+export const DEFAULT_CHAT_MODEL: string = 'default';
 
 export const myProvider = customProvider({
   languageModels: {
-    default: mistral('mistralai/Mistral-7B-v0.1'),
+    default: mistral('ministral-8b-latest'),
   },
   imageModels: {
     'small-model': openai.image('dall-e-2'),
