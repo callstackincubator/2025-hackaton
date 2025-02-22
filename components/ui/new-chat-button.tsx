@@ -72,11 +72,18 @@ export function ListeningMicButton({
   );
 }
 
+/**
+ *
+ * Returns the ready to use transcript once it's considered final. Otherwise, it returns empty string.
+ */
 const useSpeechToText = (isActive: boolean, setActive: Function) => {
   const [transcript, setTranscript] = React.useState<string>("");
 
   React.useEffect(() => {
-    if (!isActive) return;
+    if (!isActive) {
+      setTranscript("");
+      return;
+    }
 
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
@@ -88,7 +95,6 @@ const useSpeechToText = (isActive: boolean, setActive: Function) => {
 
     recognition.onstart = () => {
       console.log("Speech recognition started");
-      setActive(true);
     };
 
     recognition.onerror = (event: Event) => {
