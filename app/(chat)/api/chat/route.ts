@@ -17,7 +17,8 @@ import {
 } from '@/lib/db/queries';
 import {
   generateUUID,
-  getMostRecentUserMessage
+  getMostRecentUserMessage,
+  sanitizeResponseMessages
 } from '@/lib/utils';
 
 import { generateTitleFromUserMessage } from '../../actions';
@@ -54,12 +55,11 @@ export async function POST(request: Request) {
     await saveChat({ id, userId: session.user.id, title });
   }
 
-  console.log('elo2', userMessage);
   await saveMessages({
     messages: [{ ...userMessage, createdAt: new Date(), chatId: id }],
   });
 
-  const memories = await getMemories();
+  const memories = await getMemories({user_id: session.user?.id ?? ''});
 
   return createDataStreamResponse({
     execute: (dataStream) => {
@@ -71,33 +71,33 @@ export async function POST(request: Request) {
         experimental_transform: smoothStream({ chunking: 'word' }),
         experimental_generateMessageId: generateUUID,
         tools: {
-          updateMemory,
-          createMemory,
-          removeMemory,
+          updateMemory: updateMemory(session.user?.id ?? '', id),
+          createMemory: createMemory(session.user?.id ?? '', id),
+          removeMemory
         },
         onFinish: async ({ response, reasoning }) => {
-          // if (session.user?.id) {
-          //   try {
-          //     const sanitizedResponseMessages = sanitizeResponseMessages({
-          //       messages: response.messages,
-          //       reasoning,
-          //     });
-          //     console.log('elo', sanitizedResponseMessages);
-          //     await saveMessages({
-          //       messages: sanitizedResponseMessages.map((message) => {
-          //         return {
-          //           id: message.id,
-          //           chatId: id,
-          //           role: message.role,
-          //           content: message.content,
-          //           createdAt: new Date(),
-          //         };
-          //       }),
-          //     });
-          //   } catch (error) {
-          //     console.error('Failed to save chat');
-          //   }
-          // }
+          if (session.user?.id) {
+            try {
+              const sanitizedResponseMessages = sanitizeResponseMessages({
+                messages: response.messages,
+                reasoning,
+              });
+              
+              await saveMessages({
+                messages: sanitizedResponseMessages.map((message) => {
+                  return {
+                    id: message.id,
+                    chatId: id,
+                    role: message.role,
+                    content: message.content,
+                    createdAt: new Date(),
+                  };
+                }),
+              });
+            } catch (error) {
+              console.error('Failed to save chat');
+            }
+          }
         },
       });
 

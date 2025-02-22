@@ -112,4 +112,19 @@ export const suggestion = pgTable(
   }),
 );
 
+export const memory = pgTable('memory', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  user_id: uuid('user_id')
+    .notNull()
+    .references(() => user.id),
+  chat_id: uuid('chat_id')
+    .notNull()
+    .references(() => chat.id),
+  category: varchar('category', { length: 50 }).notNull(),
+  content: text('content').notNull(),
+  memory_date: timestamp('memory_date').notNull(),
+});
+
+export type Memory = InferSelectModel<typeof memory>;
+
 export type Suggestion = InferSelectModel<typeof suggestion>;

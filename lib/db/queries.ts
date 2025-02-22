@@ -15,6 +15,7 @@ import {
   type Message,
   message,
   vote,
+  memory,
 } from './schema';
 import { ArtifactKind } from '@/components/artifact';
 
@@ -348,35 +349,50 @@ export async function updateChatVisiblityById({
 }
 
 export async function saveMemory({
-  memory
+  user_id,
+  chat_id,
+  category,
+  content,
 }: {
-  memory: string;
+  user_id: string;
+  chat_id: string;
+  category: string
+  content: string;
 }) {
   try {
-    return true//await db.update(chat).set({ visibility }).where(eq(chat.id, chatId));
+    return await db.insert(memory).values({
+      user_id: user_id,
+      chat_id: chat_id,
+      category,
+      content,
+      memory_date: new Date(),
+    });
   } catch (error) {
-    console.error('Failed to create memory in database');
+    console.error('Failed to create memory in database', error);
     throw error;
   }
 }
 
-export async function getMemories() {
+export async function getMemories({user_id}: {user_id: string}) {
   try {
-    return ["memory"]//await db.update(chat).set({ visibility }).where(eq(chat.id, chatId));
+    return await db.select().from(memory).where(eq(memory.user_id, user_id)); // for the curennt user
   } catch (error) {
-    console.error('Failed to delete memory in database');
+    console.error('Failed to get memories in database');
     throw error;
   }
 }
 
 export async function updateMemory({
-  memoryId, newMemory
+  memoryId, newMemory, category
 }: {
   memoryId: string;
   newMemory: string;
+  category: string;
 }) {
+  console.log("UPDATE MEMORY GOES HERE", memoryId, newMemory, category)
   try {
-    return true//await db.update(chat).set({ visibility }).where(eq(chat.id, chatId));
+    await db.update(memory).set({ content: newMemory, category }).where(eq(memory.id, memoryId));
+    return true;
   } catch (error) {
     console.error('Failed to update memory in database');
     throw error;
@@ -389,7 +405,8 @@ export async function deleteMemory({
   memoryId: string;
 }) {
   try {
-    return true//await db.update(chat).set({ visibility }).where(eq(chat.id, chatId));
+    await db.delete(memory).where(eq(memory.id, memoryId));
+    return true;
   } catch (error) {
     console.error('Failed to delete memory in database');
     throw error;
