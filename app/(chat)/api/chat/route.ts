@@ -11,20 +11,19 @@ import { systemPrompt } from '@/lib/ai/prompts';
 import {
   deleteChatById,
   getChatById,
+  getMemories,
   saveChat,
   saveMessages,
 } from '@/lib/db/queries';
 import {
   generateUUID,
-  getMostRecentUserMessage,
-  sanitizeResponseMessages,
+  getMostRecentUserMessage
 } from '@/lib/utils';
 
 import { generateTitleFromUserMessage } from '../../actions';
-import { createDocument } from '@/lib/ai/tools/create-document';
-import { updateDocument } from '@/lib/ai/tools/update-document';
-import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
-import { getWeather } from '@/lib/ai/tools/get-weather';
+import { updateMemory } from '@/lib/ai/tools/update-memory';
+import { createMemory } from '@/lib/ai/tools/create-memory';
+import { removeMemory } from '@/lib/ai/tools/remove-memory';
 
 export const maxDuration = 60;
 
@@ -60,32 +59,21 @@ export async function POST(request: Request) {
     messages: [{ ...userMessage, createdAt: new Date(), chatId: id }],
   });
 
+  const memories = await getMemories();
+
   return createDataStreamResponse({
     execute: (dataStream) => {
       const result = streamText({
         model: myProvider.languageModel(selectedChatModel),
-        system: systemPrompt({ selectedChatModel }),
+        system: systemPrompt(memories),
         messages,
         maxSteps: 5,
-        experimental_activeTools:
-          selectedChatModel === 'chat-model-reasoning'
-            ? []
-            : [
-                'getWeather',
-                'createDocument',
-                'updateDocument',
-                'requestSuggestions',
-              ],
         experimental_transform: smoothStream({ chunking: 'word' }),
         experimental_generateMessageId: generateUUID,
         tools: {
-          getWeather,
-          createDocument: createDocument({ session, dataStream }),
-          updateDocument: updateDocument({ session, dataStream }),
-          requestSuggestions: requestSuggestions({
-            session,
-            dataStream,
-          }),
+          updateMemory,
+          createMemory,
+          removeMemory,
         },
         onFinish: async ({ response, reasoning }) => {
           // if (session.user?.id) {
@@ -110,10 +98,6 @@ export async function POST(request: Request) {
           //     console.error('Failed to save chat');
           //   }
           // }
-        },
-        experimental_telemetry: {
-          isEnabled: true,
-          functionId: 'stream-text',
         },
       });
 

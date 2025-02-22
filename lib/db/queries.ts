@@ -346,3 +346,53 @@ export async function updateChatVisiblityById({
     throw error;
   }
 }
+
+export async function saveMemory({
+  memory
+}: {
+  memory: string;
+}) {
+  try {
+    return true//await db.update(chat).set({ visibility }).where(eq(chat.id, chatId));
+  } catch (error) {
+    console.error('Failed to create memory in database');
+    throw error;
+  }
+}
+
+export async function getMemories() {
+  try {
+    return ["memory"]//await db.update(chat).set({ visibility }).where(eq(chat.id, chatId));
+  } catch (error) {
+    console.error('Failed to delete memory in database');
+    throw error;
+  }
+}
+
+export async function updateMemory({
+  memoryId, newMemory
+}: {
+  memoryId: string;
+  newMemory: string;
+}) {
+  try {
+    return true//await db.update(chat).set({ visibility }).where(eq(chat.id, chatId));
+  } catch (error) {
+    console.error('Failed to update memory in database');
+    throw error;
+  }
+}
+
+export async function deleteMemory({
+  memoryId
+}: {
+  memoryId: string;
+}) {
+  try {
+    return true//await db.update(chat).set({ visibility }).where(eq(chat.id, chatId));
+  } catch (error) {
+    console.error('Failed to delete memory in database');
+    throw error;
+  }
+}
+
