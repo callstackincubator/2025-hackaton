@@ -11,7 +11,7 @@ export function Box({
   return (
     <div
       className={cn(
-        "rounded-lg border bg-white shadow-sm overflow-hidden",
+        "rounded-lg border bg-background shadow-sm overflow-hidden",
         className
       )}
     >
@@ -45,10 +45,8 @@ export function BoxTitle({
 
 export function BoxContent({
   className,
-  children,
-}: {
-  className?: string;
-  children?: React.ReactNode;
-}) {
-  return <div className={cn("p-6 bg-white", className)}>{children}</div>;
+  children
+}: {className?: string;
+  children?: React.ReactNode;}) {
+  return <div className={cn("p-6 bg-background", className)}>{children}</div>;
 }

@@ -9,7 +9,7 @@ export function Card({
   children?: React.ReactNode;
 }) {
   return (
-    <div className={cn("rounded-lg border bg-white shadow-sm", className)}>
+    <div className={cn("rounded-lg border bg-background shadow-sm", className)}>
       {children}
     </div>
   );
@@ -39,7 +39,7 @@ export function CardTitle({
   return (
     <h3
       className={cn(
-        "text-lg font-semibold leading-none tracking-tight text-gray-800",
+        "text-lg font-semibold leading-none tracking-tight dark:text-white-800",
         className
       )}
     >
