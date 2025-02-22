@@ -55,6 +55,7 @@ export async function POST(request: Request) {
     await saveChat({ id, userId: session.user.id, title });
   }
 
+  console.log('elo2', userMessage);
   await saveMessages({
     messages: [{ ...userMessage, createdAt: new Date(), chatId: id }],
   });
@@ -87,28 +88,28 @@ export async function POST(request: Request) {
           }),
         },
         onFinish: async ({ response, reasoning }) => {
-          if (session.user?.id) {
-            try {
-              const sanitizedResponseMessages = sanitizeResponseMessages({
-                messages: response.messages,
-                reasoning,
-              });
-
-              await saveMessages({
-                messages: sanitizedResponseMessages.map((message) => {
-                  return {
-                    id: message.id,
-                    chatId: id,
-                    role: message.role,
-                    content: message.content,
-                    createdAt: new Date(),
-                  };
-                }),
-              });
-            } catch (error) {
-              console.error('Failed to save chat');
-            }
-          }
+          // if (session.user?.id) {
+          //   try {
+          //     const sanitizedResponseMessages = sanitizeResponseMessages({
+          //       messages: response.messages,
+          //       reasoning,
+          //     });
+          //     console.log('elo', sanitizedResponseMessages);
+          //     await saveMessages({
+          //       messages: sanitizedResponseMessages.map((message) => {
+          //         return {
+          //           id: message.id,
+          //           chatId: id,
+          //           role: message.role,
+          //           content: message.content,
+          //           createdAt: new Date(),
+          //         };
+          //       }),
+          //     });
+          //   } catch (error) {
+          //     console.error('Failed to save chat');
+          //   }
+          // }
         },
         experimental_telemetry: {
           isEnabled: true,
