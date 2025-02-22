@@ -5,21 +5,47 @@ import { Message, CreateMessage, ChatRequestOptions } from "ai";
 
 export function ListeningMicButton({
   append,
+  onStart,
 }: {
   append: (
     message: Message | CreateMessage,
     chatRequestOptions?: ChatRequestOptions
   ) => Promise<string | null | undefined>;
+  onStart?: () => void;
 }) {
   const [isActive, setIsActive] = React.useState(false);
-  const { transcript, isFinal } = useSpeechToText(isActive, setIsActive);
+  const [isActuallyListening, setIsActuallyListening] = React.useState(false);
+  const hasStartedRef = React.useRef(false);
+  const { transcript, isFinal } = useSpeechToText(isActuallyListening, setIsActuallyListening);
   const lastWord = transcript.split(" ")[transcript.split(" ").length - 1];
 
+  const handleClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const newIsActive = !isActive;
+    setIsActive(newIsActive);
+
+    if (newIsActive) {
+      if (!hasStartedRef.current && onStart) {
+        hasStartedRef.current = true;
+        // Start visual feedback immediately
+        await onStart();
+        // Start actual listening after onStart (audio playback) completes
+        setIsActuallyListening(true);
+      } else {
+        setIsActuallyListening(true);
+      }
+    } else {
+      setIsActuallyListening(false);
+    }
+  };
+
   React.useEffect(() => {
-    if (isActive && isFinal && transcript) {
+    if (isActuallyListening && isFinal && transcript) {
       append({ content: transcript, role: "user" });
     }
-  }, [isActive, isFinal, transcript]);
+  }, [isActuallyListening, isFinal, transcript, append]);
 
   return (
     <button
@@ -32,11 +58,7 @@ export function ListeningMicButton({
         }
         hover:scale-105 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-opacity-50
       `}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsActive(!isActive);
-      }}
+      onClick={handleClick}
     >
       {!isActive && (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -45,35 +67,18 @@ export function ListeningMicButton({
       )}
       {isActive && (
         <>
-          <div className="absolute inset-0 rounded-full animate-ping-slow opacity-30 bg-purple-300" />
-          <div className="absolute inset-[-10px] rounded-full border-4 border-violet-500 opacity-30 animate-ping-slow" />
-          <div
-            className="absolute inset-0 rounded-full animate-gradient bg-gradient-to-r from-blue-500 via-blue-500 to-indigo-500 opacity-50"
-            style={{ backgroundSize: "200%" }}
-          ></div>
-          <div
-            className="absolute inset-1 rounded-full animate-gradient bg-gradient-to-r blur-lg from-blue-500 via-blue-500 to-indigo-500"
-            style={{ backgroundSize: "200%" }}
-          ></div>
-          <div
-            className="absolute inset-0 rounded-full animate-gradient bg-gradient-to-r from-indigo-500 via-green-500 to-violet-500 opacity-50 rotate-180"
-            style={{ backgroundSize: "300%" }}
-          ></div>
-          <div
-            className="absolute inset-0 rounded-full animate-gradient bg-gradient-to-r from-teal-500 via-blue-500 to-cyan-500 opacity-50 rotate-90"
-            style={{ backgroundSize: "100%" }}
-          ></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-16 h-8 flex justify-around items-end">
-              <div className="absolute w-8 h-8 bg-white rounded-full blur-lg" />
-              <div className="absolute w-8 h-8 bg-white rounded-full opacity-70 blur-lg" />
-            </div>
-          </div>
-          <div
-            className="absolute top-[-55px] left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-teal-500 via-blue-500 to-violet-500 text-white p-1 rounded"
-            style={{ backgroundSize: "300%" }}
-          >
-            {!isFinal ? lastWord : ""}
+          <div className="absolute inset-0 rounded-full animate-ping bg-violet-400 opacity-20" />
+          <div className="flex justify-center items-center gap-1 mt-1">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="w-1.5 bg-white rounded-full animate-equalizer"
+                style={{
+                  height: `${Math.random() * 100}%`,
+                  animationDelay: `${i * 0.2}s`,
+                }}
+              />
+            ))}
           </div>
         </>
       )}
