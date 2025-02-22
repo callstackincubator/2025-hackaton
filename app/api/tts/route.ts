@@ -1,12 +1,11 @@
+import { getLatestVoice } from "@/lib/db/queries"
 import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   try {
-    console.log("TTS request received")
     const { text, voice } = await request.json()
-    console.log({ text, voice})
-    console.log("TTS request received", text, voice)
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, {
+    const latestVoice = await getLatestVoice()
+    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${latestVoice?.voice_id ?? voice}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

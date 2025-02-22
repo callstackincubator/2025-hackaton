@@ -43,6 +43,10 @@ export function SidebarUserNav({ user }: { user: User }) {
             className="w-[--radix-popper-anchor-width]"
           >
             <DropdownMenuItem className="cursor-pointer">
+              <Link href="/voice">Record new voice</Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer">
               <Link href="/me">About myself</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
