@@ -1,9 +1,10 @@
 "use client";
 
 import type { Attachment, Message } from "ai";
-import { useChat } from "@ai-sdk/react";
-import { useState } from "react";
+import { useChat } from "ai/react";
+import { useEffect, useState, useRef } from "react";
 import useSWR, { useSWRConfig } from "swr";
+import React from "react";
 
 import { ChatHeader } from "@/components/chat-header";
 import type { Vote } from "@/lib/db/schema";
@@ -31,6 +32,8 @@ export function Chat({
   isReadonly: boolean;
 }) {
   const { mutate } = useSWRConfig();
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
   const {
     messages,
@@ -49,11 +52,37 @@ export function Chat({
     experimental_throttle: 100,
     sendExtraMessageFields: true,
     generateId: generateUUID,
-    onFinish: () => {
+    onFinish: async (message) => {
       mutate("/api/history");
+      const response = await fetch("/api/tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: message.content, voice: "21m00Tcm4TlvDq8ikWAM" }), // TODO: make this dynamic, replace with the voice of the user
+      });
+      
+      if (!response.ok) {
+        console.error(response);
+        toast.error("Failed to generate speech");
+        return;
+      }
+
+      const audioBlob = await response.blob();
+      const url = URL.createObjectURL(audioBlob);
+      setAudioUrl(url);
+      
+      // Play audio immediately
+      if (audioRef.current) {
+        audioRef.current.src = url;
+        audioRef.current.play().catch(e => {
+          console.error("Audio playback failed:", e);
+          toast.error("Failed to play audio");
+        });
+      }
     },
     onError: (error) => {
-      toast.error("An error occured, please try again!");
+      toast.error("An error occurred, please try again!");
     },
   });
 
@@ -65,14 +94,31 @@ export function Chat({
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
   const isLoading = status === "streaming";
+
+  // Cleanup audio URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, [audioUrl]);
+
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background">
+        
         <ChatHeader
           chatId={id}
           selectedModelId={selectedChatModel}
           selectedVisibilityType={selectedVisibilityType}
           isReadonly={isReadonly}
+        />
+
+        <audio 
+          ref={audioRef} 
+          className="hidden" // Hide the audio element but keep it in the DOM
+          onError={() => toast.error("Audio playback failed")}
         />
 
         <div className="flex flex-col h-full">
