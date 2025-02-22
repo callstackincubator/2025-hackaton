@@ -1,7 +1,7 @@
 "use client";
 
 import type { Attachment, Message } from "ai";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
 import { useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 
@@ -39,7 +39,7 @@ export function Chat({
     input,
     setInput,
     append,
-    isLoading,
+    status,
     stop,
     reload,
   } = useChat({
@@ -64,7 +64,7 @@ export function Chat({
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
-
+  const isLoading = status === "streaming";
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background">

@@ -17,6 +17,9 @@ importers:
       '@ai-sdk/openai':
         specifier: 1.1.9
         version: 1.1.9(zod@3.23.8)
+      '@ai-sdk/react':
+        specifier: ^1.1.17
+        version: 1.1.17(react@19.0.0-rc-45804af1-20241021)(zod@3.23.8)
       '@codemirror/lang-javascript':
         specifier: ^6.2.2
         version: 6.2.2
