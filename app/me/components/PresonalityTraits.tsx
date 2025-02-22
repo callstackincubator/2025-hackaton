@@ -125,6 +125,10 @@ export async function MemoryTraits({ userId }: { userId: string }) {
   
   return (
     <div className="space-y-6">
+      <h1 className="text-2xl font-bold">Memory Traits</h1>
+      <p className="text-gray-500">
+        These traits are based on your memories. Total memories: {memories.length}, they{"'"}re automatically generated based on your conversations!
+      </p>
       {traits.map((trait, index) => (
         <Box key={index} className={trait.color}>
           <BoxHeader>
