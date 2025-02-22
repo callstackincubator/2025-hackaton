@@ -4,6 +4,8 @@ import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 
 import './globals.css';
+import { MicrophoneContextProvider } from './context/MicrophoneContextProvider';
+import { DeepgramContextProvider } from './context/DeepgramContextProvider';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://chat.vercel.ai'),
@@ -63,8 +65,11 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+
           <Toaster position="top-center" />
-          {children}
+          <MicrophoneContextProvider>
+            <DeepgramContextProvider>{children}</DeepgramContextProvider>
+          </MicrophoneContextProvider>
         </ThemeProvider>
       </body>
     </html>
