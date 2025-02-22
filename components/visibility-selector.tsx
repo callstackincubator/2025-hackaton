@@ -62,23 +62,6 @@ export function VisibilitySelector({
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger
-        asChild
-        className={cn(
-          'w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
-          className,
-        )}
-      >
-        <Button
-          variant="outline"
-          className="hidden md:flex md:px-2 md:h-[34px]"
-        >
-          {selectedVisibility?.icon}
-          {selectedVisibility?.label}
-          <ChevronDownIcon />
-        </Button>
-      </DropdownMenuTrigger>
-
       <DropdownMenuContent align="start" className="min-w-[300px]">
         {visibilities.map((visibility) => (
           <DropdownMenuItem
