@@ -1,16 +1,34 @@
-"use client"
+"use client";
+import * as React from "react";
+import { MicOff } from "lucide-react";
+import { Message, CreateMessage, ChatRequestOptions } from "ai";
 
-import * as React from "react"
-import { MicOff } from "lucide-react"
-import { Message, CreateMessage, ChatRequestOptions } from "ai"
-export function ListeningMicButton({ append, chatId }: { append: (message: Message | CreateMessage, chatRequestOptions?: ChatRequestOptions) => Promise<string | null | undefined>; chatId: string }) {
-  const [isActive, setIsActive] = React.useState(false)
+export function ListeningMicButton({
+  append,
+}: {
+  append: (
+    message: Message | CreateMessage,
+    chatRequestOptions?: ChatRequestOptions
+  ) => Promise<string | null | undefined>;
+}) {
+  const [isActive, setIsActive] = React.useState(false);
+  const { transcript, isFinal } = useSpeechToText(isActive, setIsActive);
+
+  React.useEffect(() => {
+    if (isActive && isFinal && transcript) {
+      append({ content: transcript, role: "user" });
+    }
+  }, [isActive, isFinal, transcript]);
 
   return (
     <button
       className={`
         relative w-20 h-20 rounded-full transition-all duration-500 ease-in-out
-        ${isActive ? "bg-red-500 text-white scale-110 shadow-lg" : "bg-white text-gray-600 hover:bg-gray-100"}
+        ${
+          isActive
+            ? "bg-red-500 text-white scale-110 shadow-lg"
+            : "bg-white text-gray-600 hover:bg-gray-100"
+        }
         hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50
         border border-gray-300
       `}
@@ -18,7 +36,6 @@ export function ListeningMicButton({ append, chatId }: { append: (message: Messa
         e.preventDefault();
         e.stopPropagation();
         setIsActive(!isActive);
-
       }}
     >
       {!isActive && (
@@ -44,10 +61,82 @@ export function ListeningMicButton({ append, chatId }: { append: (message: Messa
               ))}
             </div>
           </div>
+          <div className="absolute top-[-40px] left-1/2 transform -translate-x-1/2 bg-red-500 text-white p-1 rounded">
+            {!isFinal
+              ? transcript.split(" ")[transcript.split(" ").length - 1]
+              : ""}
+          </div>
         </>
       )}
-      <span className="sr-only">{isActive ? "Deactivate" : "Activate"} microphone</span>
+      <span className="sr-only">
+        {isActive ? "Deactivate" : "Activate"} microphone
+      </span>
     </button>
-  )
+  );
 }
 
+/**
+ *
+ * Returns the ready to use transcript once it's considered final. Otherwise, it returns empty string.
+ */
+const useSpeechToText = (isActive: boolean, setActive: Function) => {
+  const [result, setResult] = React.useState<{
+    transcript: string;
+    isFinal: boolean;
+  }>({
+    transcript: "",
+    isFinal: false,
+  });
+
+  React.useEffect(() => {
+    if (!isActive) {
+      setResult({ transcript: "", isFinal: false });
+      return;
+    }
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onstart = () => {
+      console.log("Speech recognition started");
+    };
+
+    recognition.onerror = (event: Event) => {
+      console.error("Speech recognition error:", event);
+      setActive(false);
+    };
+
+    // breaks Safari
+    // recognition.onend = () => {
+    //   console.log("Speech recognition ended");
+    //   setActive(false);
+    // };
+
+    recognition.onresult = (event: any) => {
+      let transcript = "";
+      let isFinal = false;
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        transcript += event.results[i][0].transcript;
+        isFinal = event.results[i].isFinal;
+      }
+      setResult({ transcript, isFinal });
+    };
+
+    recognition.start();
+
+    return () => {
+      recognition.stop();
+      recognition.onstart = null;
+      recognition.onerror = null;
+      recognition.onend = null;
+      recognition.onresult = null;
+    };
+  }, [isActive, setActive]);
+
+  return result;
+};

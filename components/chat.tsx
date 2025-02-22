@@ -89,12 +89,12 @@ export function Chat({
                 isArtifactVisible={isArtifactVisible}
               />
               <div className="flex justify-center items-center mt-4 mb-4">
-                <ListeningMicButton append={append} chatId={id} />
+                <ListeningMicButton append={append} />
               </div>
             </>
           ) : (
             <div className="flex justify-center items-center h-full">
-              <ListeningMicButton append={append} chatId={id} />
+              <ListeningMicButton append={append} />
             </div>
           )}
         </div>
