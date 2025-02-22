@@ -1,6 +1,6 @@
 "use client";
 
-import type { Attachment, Message } from "ai";
+import { generateText, type Attachment, type Message } from "ai";
 import { useChat } from "ai/react";
 import { useEffect, useState, useRef } from "react";
 import useSWR, { useSWRConfig } from "swr";
@@ -34,6 +34,48 @@ export function Chat({
   const { mutate } = useSWRConfig();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+
+  const initialLoadRef = useRef<boolean>(true);
+
+  useEffect(() => {
+    const fetchGreeting = async () => {
+      if (initialLoadRef.current && messages.length === 0) {
+        initialLoadRef.current = false
+        try {
+          const response = await fetch('/api/greeting')
+          if (!response.ok) throw new Error('Failed to fetch greeting')
+          
+          const data = await response.json()
+
+          const audioResponse = await fetch('/api/tts', {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ text: data.greeting, voice: "21m00Tcm4TlvDq8ikWAM" }), // TODO: make this dynamic, replace with the voice of the user
+          });
+          // call tts
+          const audioBlob = await audioResponse.blob();
+          const url = URL.createObjectURL(audioBlob);
+          setAudioUrl(url);
+          
+          // Play audio immediately
+          if (audioRef.current) {
+            audioRef.current.src = url;
+            audioRef.current.play().catch(e => {
+              console.error("Audio playback failed:", e);
+              toast.error("Failed to play audio");
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching greeting:', error)
+          toast.error('Failed to generate greeting')
+        }
+      }
+    }
+
+    fetchGreeting()
+  }, [])
 
   const {
     messages,
@@ -75,10 +117,6 @@ export function Chat({
       // Play audio immediately
       if (audioRef.current) {
         audioRef.current.src = url;
-        audioRef.current.play().catch(e => {
-          console.error("Audio playback failed:", e);
-          toast.error("Failed to play audio");
-        });
       }
     },
     onError: (error) => {
@@ -135,12 +173,20 @@ export function Chat({
                 isArtifactVisible={isArtifactVisible}
               />
               <div className="flex justify-center items-center mt-4 mb-4">
-                <ListeningMicButton append={append} />
+                <ListeningMicButton append={append} onStart={() => {
+                  if (audioRef.current) {
+                    audioRef.current.play();
+                  }
+                }} />
               </div>
             </>
           ) : (
             <div className="flex justify-center items-center h-full">
-              <ListeningMicButton append={append} />
+              <ListeningMicButton append={append} onStart={() => {
+                if (audioRef.current) {
+                  audioRef.current.play();
+                }
+              }} />
             </div>
           )}
         </div>
