@@ -18,6 +18,7 @@ import {
   memory,
 } from './schema';
 import { ArtifactKind } from '@/components/artifact';
+import { auth } from '@/app/(auth)/auth';
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
@@ -374,9 +375,17 @@ export async function saveMemory({
 }
 
 export async function getMemories({user_id}: {user_id: string}) {
+  if (user_id === '') {
+    const session = await auth()
+    user_id = session?.user?.id ?? ''
+  }
+
   try {
-    return await db.select().from(memory).where(eq(memory.user_id, user_id)); // for the curennt user
+    const memories = await db.select().from(memory).where(eq(memory.user_id, user_id)); // for the curennt user
+
+    return memories
   } catch (error) {
+    console.log(error)
     console.error('Failed to get memories in database');
     throw error;
   }
