@@ -31,6 +31,7 @@ import { codeArtifact } from '@/artifacts/code/client';
 import { sheetArtifact } from '@/artifacts/sheet/client';
 import { textArtifact } from '@/artifacts/text/client';
 import equal from 'fast-deep-equal';
+import { ListeningMicButton } from './ui/new-chat-button';
 
 export const artifactDefinitions = [
   textArtifact,
@@ -334,6 +335,9 @@ function PureArtifact({
                   artifactStatus={artifact.status}
                 />
 
+                <div className="flex justify-center items-center">
+                  <ListeningMicButton append={append} chatId={chatId} />
+                </div>
                 <form className="flex flex-row gap-2 relative items-end w-full px-4 pb-4">
                   <MultimodalInput
                     chatId={chatId}

@@ -196,11 +196,11 @@ function PureMultimodalInput({
 
   return (
     <div className="relative w-full flex flex-col gap-4">
-      {messages.length === 0 &&
+      {/* {messages.length === 0 &&
         attachments.length === 0 &&
         uploadQueue.length === 0 && (
           <ListeningMicButton append={append} chatId={chatId} />
-        )}
+        )} */}
 
         <Button
           className="rounded-full p-3 shadow-lg w-[50px] h-[50px] flex items-center justify-center"
