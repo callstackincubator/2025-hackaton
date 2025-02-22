@@ -3,6 +3,7 @@ import { Box, BoxContent, BoxHeader, BoxTitle } from "./box";
 import { Card, CardContent, CardHeader, CardTitle } from "./card";
 import { Brain, Heart, Smile, Star, Compass, BookOpen, TrendingUp, Users, User, Activity, HeartPulse } from "lucide-react";
 import { getMemories } from '@/lib/db/queries'
+import MemoryList from "./MemoryList";
 
 type TraitItem = {
   subtitle: string;
@@ -121,8 +122,6 @@ const traits: Trait[] = [
 
 export async function MemoryTraits({ userId }: { userId: string }) {
   const memories = await getMemories({ user_id: userId })
-
-  console.log({memories})
   
   return (
     <div className="space-y-6">
@@ -145,13 +144,7 @@ export async function MemoryTraits({ userId }: { userId: string }) {
                     </CardHeader>
                     <CardContent>
                       {itemMemories.length > 0 ? (
-                        <div className="space-y-2">
-                          {itemMemories.map(memory => (
-                            <p key={memory.id} className="text-sm text-gray-600">
-                              {memory.content}
-                            </p>
-                          ))}
-                        </div>
+                        <MemoryList memories={itemMemories} />
                       ) : (
                         <p className="text-sm text-gray-400 italic">
                           No memories in this category yet
@@ -168,32 +161,3 @@ export async function MemoryTraits({ userId }: { userId: string }) {
     </div>
   );
 }
-
-// export default function PersonalityTraits() {
-//   return (
-//     <div className="space-y-6">
-//       {traits.map((trait, index) => (
-//         <Box key={index} className={trait.color}>
-//           <BoxHeader>
-//             <BoxTitle className="flex items-center gap-2">
-//               {createElement(trait.icon, { className: "w-6 h-6" })}
-//               {trait.title}
-//             </BoxTitle>
-//           </BoxHeader>
-//           <BoxContent>
-//             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-//               {trait.items.map((item, itemIndex) => (
-//                 <Card key={itemIndex}>
-//                   <CardHeader>
-//                     <CardTitle>{item.subtitle}</CardTitle>
-//                   </CardHeader>
-//                   <CardContent>{item.customContent}</CardContent>
-//                 </Card>
-//               ))}
-//             </div>
-//           </BoxContent>
-//         </Box>
-//       ))}
-//     </div>
-//   );
-// }
