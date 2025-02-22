@@ -35,7 +35,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               }}
               className="flex flex-row gap-3 items-center"
             >
-              <Image alt='logo' src={"/mirror.png"} width={100} height={40} className='px-2 w-full cursor-pointer' />
+              <Image alt='logo' src={"/mirror_text.png"} width={100} height={40} className='px-2 w-full cursor-pointer' />
             </Link>
             <Tooltip>
               <TooltipTrigger asChild>
