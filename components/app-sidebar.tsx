@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import Image from 'next/image';
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
@@ -34,9 +35,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               }}
               className="flex flex-row gap-3 items-center"
             >
-              <span className="text-lg font-semibold px-2 hover:bg-muted rounded-md cursor-pointer">
-                Mirror.ai
-              </span>
+              <Image alt='logo' src={"/mirror_text.png"} width={100} height={40} className='px-2 w-full cursor-pointer' />
             </Link>
             <Tooltip>
               <TooltipTrigger asChild>
