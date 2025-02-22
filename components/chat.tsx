@@ -166,7 +166,7 @@ export function Chat({
         <div className="flex flex-col h-full">
           {showJourney ? (
           <div className="flex flex-col justify-center items-center h-full">
-            <Image src="/mirror_logo_end.png" alt="Logo" width={200} height={200} />
+            <Image src="/logo_landing.png" alt="Logo" width={200} height={200} />
             <JourneyButton text="Press to start!" onClick={() => {
               if (audioRef.current) {
                 audioRef.current.play().catch(e => {
