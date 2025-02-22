@@ -5,22 +5,20 @@ import { Message, CreateMessage, ChatRequestOptions } from "ai";
 
 export function ListeningMicButton({
   append,
-  chatId,
 }: {
   append: (
     message: Message | CreateMessage,
     chatRequestOptions?: ChatRequestOptions
   ) => Promise<string | null | undefined>;
-  chatId: string;
 }) {
   const [isActive, setIsActive] = React.useState(false);
-  const transcript = useSpeechToText(isActive, setIsActive);
+  const { transcript, isFinal } = useSpeechToText(isActive, setIsActive);
 
   React.useEffect(() => {
-    if (isActive && transcript) {
+    if (isActive && isFinal && transcript) {
       append({ content: transcript, role: "user" });
     }
-  }, [transcript, isActive]);
+  }, [isActive, isFinal, transcript]);
 
   return (
     <button
@@ -63,6 +61,11 @@ export function ListeningMicButton({
               ))}
             </div>
           </div>
+          <div className="absolute top-[-40px] left-1/2 transform -translate-x-1/2 bg-red-500 text-white p-1 rounded">
+            {!isFinal
+              ? transcript.split(" ")[transcript.split(" ").length - 1]
+              : ""}
+          </div>
         </>
       )}
       <span className="sr-only">
@@ -77,11 +80,17 @@ export function ListeningMicButton({
  * Returns the ready to use transcript once it's considered final. Otherwise, it returns empty string.
  */
 const useSpeechToText = (isActive: boolean, setActive: Function) => {
-  const [transcript, setTranscript] = React.useState<string>("");
+  const [result, setResult] = React.useState<{
+    transcript: string;
+    isFinal: boolean;
+  }>({
+    transcript: "",
+    isFinal: false,
+  });
 
   React.useEffect(() => {
     if (!isActive) {
-      setTranscript("");
+      setResult({ transcript: "", isFinal: false });
       return;
     }
 
@@ -109,15 +118,13 @@ const useSpeechToText = (isActive: boolean, setActive: Function) => {
     // };
 
     recognition.onresult = (event: any) => {
-      let finalTranscript = "";
+      let transcript = "";
       let isFinal = false;
       for (let i = event.resultIndex; i < event.results.length; ++i) {
-        finalTranscript += event.results[i][0].transcript;
+        transcript += event.results[i][0].transcript;
         isFinal = event.results[i].isFinal;
       }
-      if (isFinal) {
-        setTranscript(finalTranscript);
-      }
+      setResult({ transcript, isFinal });
     };
 
     recognition.start();
@@ -131,5 +138,5 @@ const useSpeechToText = (isActive: boolean, setActive: Function) => {
     };
   }, [isActive, setActive]);
 
-  return transcript;
+  return result;
 };
