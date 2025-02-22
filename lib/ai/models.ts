@@ -7,7 +7,7 @@ export const DEFAULT_CHAT_MODEL: string = 'default';
 
 export const myProvider = customProvider({
   languageModels: {
-    default: mistral('ministral-8b-latest'),
+    default: mistral('mistral-large-latest'),
   },
   imageModels: {
     'small-model': openai.image('dall-e-2'),
