@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { useEffect, useState, useRef } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import React from "react";
+import Image from "next/image";
 
 import { ChatHeader } from "@/components/chat-header";
 import type { Vote } from "@/lib/db/schema";
@@ -17,6 +18,7 @@ import { VisibilityType } from "./visibility-selector";
 import { useArtifactSelector } from "@/hooks/use-artifact";
 import { toast } from "sonner";
 import { ListeningMicButton } from "./ui/new-chat-button";
+import JourneyButton from "./ui/start-chat";
 
 export function Chat({
   id,
@@ -62,10 +64,6 @@ export function Chat({
           // Play audio immediately
           if (audioRef.current) {
             audioRef.current.src = url;
-            audioRef.current.play().catch(e => {
-              console.error("Audio playback failed:", e);
-              toast.error("Failed to play audio");
-            });
           }
         } catch (error) {
           console.error('Error fetching greeting:', error)
@@ -117,6 +115,10 @@ export function Chat({
       // Play audio immediately
       if (audioRef.current) {
         audioRef.current.src = url;
+        audioRef.current.play().catch(e => {
+          console.error("Audio playback failed:", e);
+          toast.error("Failed to play audio");
+        });
       }
     },
     onError: (error) => {
@@ -142,6 +144,8 @@ export function Chat({
     };
   }, [audioUrl]);
 
+  const [showJourney, setShowJourney] = useState(messages.length === 0);
+
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background">
@@ -160,6 +164,23 @@ export function Chat({
         />
 
         <div className="flex flex-col h-full">
+          {showJourney ? (
+          <div className="flex flex-col justify-center items-center h-full">
+            <Image src="/mirror_logo_end.png" alt="Logo" width={200} height={200} />
+            <JourneyButton text="Press to start!" onClick={() => {
+              if (audioRef.current) {
+                audioRef.current.play().catch(e => {
+                  console.error("Audio playback failed:", e);
+                  toast.error("Failed to play audio");
+                });
+              }
+              setTimeout(() => {
+                setShowJourney(false);
+              }, audioRef.current?.duration || 0);
+            }}/>
+          </div>
+          ) : (
+            <>
           {messages.length > 0 ? (
             <>
               <Messages
@@ -173,24 +194,14 @@ export function Chat({
                 isArtifactVisible={isArtifactVisible}
               />
               <div className="flex justify-center items-center mt-4 mb-4">
-                <ListeningMicButton append={append} onStart={() => {
-                  if (audioRef.current) {
-                    audioRef.current.play();
-                  }
-                }} />
+                <ListeningMicButton append={append} />
               </div>
             </>
           ) : (
             <div className="flex justify-center items-center h-full">
-              <ListeningMicButton append={append} onStart={() => {
-                if (audioRef.current) {
-                  audioRef.current.play();
-                }
-              }} />
+              <ListeningMicButton append={append} />
             </div>
           )}
-        </div>
-
         <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
           {!isReadonly && (
             <MultimodalInput
@@ -208,6 +219,10 @@ export function Chat({
             />
           )}
         </form>
+          </>
+          )}
+        </div>
+
       </div>
 
       <Artifact
@@ -229,3 +244,5 @@ export function Chat({
     </>
   );
 }
+
+
