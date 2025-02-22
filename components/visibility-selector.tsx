@@ -55,11 +55,6 @@ export function VisibilitySelector({
     initialVisibility: selectedVisibilityType,
   });
 
-  const selectedVisibility = useMemo(
-    () => visibilities.find((visibility) => visibility.id === visibilityType),
-    [visibilityType],
-  );
-
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuContent align="start" className="min-w-[300px]">
