@@ -120,7 +120,29 @@ export function Chat({
         return;
       }
 
-      const audioBlob = await response.blob();
+      const reader: any = response.body?.getReader();
+      if (!reader) {
+        toast.error("Failed to read audio stream");
+        return;
+      }
+
+      const stream = new ReadableStream({
+        start(controller) {
+          function push() {
+            reader.read().then(({ done, value }: any) => {
+              if (done) {
+                controller.close();
+                return;
+              }
+              controller.enqueue(value);
+              push();
+            });
+          }
+          push();
+        },
+      });
+
+      const audioBlob = await new Response(stream).blob();
       const url = URL.createObjectURL(audioBlob);
       setAudioUrl(url);
 
@@ -131,6 +153,12 @@ export function Chat({
           console.error("Audio playback failed:", e);
           toast.error("Failed to play audio");
         });
+      }
+
+      if (!response.ok) {
+        console.error(response);
+        toast.error("Failed to generate speech");
+        return;
       }
     },
     onError: (error) => {
