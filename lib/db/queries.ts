@@ -397,20 +397,20 @@ export async function getMemories({ user_id }: { user_id: string }) {
 }
 
 export async function updateMemory({
+  userId,
   memoryId,
   newMemory,
-  category,
 }: {
+  userId: string;
   memoryId: string;
   newMemory: string;
-  category: string;
 }) {
-  console.log("UPDATE MEMORY GOES HERE", memoryId, newMemory, category);
+  console.log("UPDATE MEMORY GOES HERE", memoryId, newMemory);
   try {
     await db
       .update(memory)
-      .set({ content: newMemory, category })
-      .where(eq(memory.id, memoryId));
+      .set({ content: newMemory })
+      .where(and(eq(memory.id, memoryId), eq(user.id, userId)));
     return true;
   } catch (error) {
     console.error("Failed to update memory in database");

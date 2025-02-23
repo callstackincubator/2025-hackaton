@@ -23,17 +23,21 @@ export const createMemory = (userId: string, chatId: string) => {
         ])
     }),
     execute: async ({ memory_description, category }) => {
-      const success = await saveMemory({
-        user_id: userId,
-        chat_id: chatId,
-        category,
-        content: memory_description,
-      });
+      try {
+        const success = await saveMemory({
+          user_id: userId,
+          chat_id: chatId,
+          category,
+          content: memory_description,
+        });
 
-      if (success) {
-        return `Saved a memory: ${memory_description}`;
-      } else {
-        return "Couldn't create memory";
+        if (success) {
+          return `Saved a memory: ${memory_description}`;
+        } else {
+          return "Couldn't create memory";
+        }
+      } catch {
+        return "There was an error when saving memory"
       }
     },
   });

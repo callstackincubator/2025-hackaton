@@ -8,13 +8,17 @@ export const removeMemory = tool({
       memory_id: z.string(),
     }),
     execute: async ({ memory_id }) => {
-          // Remove existing memory
-          const success = await deleteMemory({memoryId: memory_id})
-      
-          if(success) {
-            return "Memory deleted"
-          } else {
-            return "Couldn't delete memory"
-          }
+        try {
+            // Remove existing memory
+            const success = await deleteMemory({memoryId: memory_id})
+            
+            if(success) {
+                return "Memory deleted"
+            } else {
+                return "Couldn't delete memory"
+            }
+        } catch {
+            return "There was an error when deleting memory"
+        }
     },
   });
