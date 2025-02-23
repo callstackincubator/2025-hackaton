@@ -387,7 +387,6 @@ export async function getMemories({ user_id }: { user_id: string }) {
       .select()
       .from(memory)
       .where(eq(memory.user_id, user_id)); // for the curennt user
-    console.warn('memories', memories);
     return memories;
   } catch (error) {
     console.log(error);

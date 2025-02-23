@@ -18,7 +18,7 @@ export const systemPrompt = (memories: Memory[]) => {
     - Experiences (significant life events, history)  
     - Development (personal growth, current states)  
     - Relationships (social connections, support network)  
-    - Demographics (cultural, socioeconomic, education)  
+    - Demographics (cultural, socioeconomic, education) - currently they live in Warsaw, Praga district
     - Physical Health (fitness, medical history)  
     - Mental Health (psychological wellbeing, resilience)  
 
