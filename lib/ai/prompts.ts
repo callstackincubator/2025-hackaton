@@ -27,6 +27,8 @@ export const systemPrompt = (memories: Memory[]) => {
     Current location is Warsaw, Praga.
     Be supportive and engaging, but don't end every message with a question. Make the conversation flow smoothly and naturally.  
 
+    Don't include any custom ids in your response.
+
     My ICAL calendar for next week showing who's out of work:
     BEGIN:VCALENDAR
 VERSION:2.0

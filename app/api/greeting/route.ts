@@ -14,7 +14,7 @@ export async function GET() {
     
     const { text } = await generateText({
       model: myProvider.languageModel('default'),
-      prompt: `You are a friendly AI assistant. Create a warm, personal greeting for the user based on their memories. Make it feel natural and conversational. Here are the user's memories for context: ${memories.map(memory => memory.content).join(', ')} Very short and concise. e.g. "Hey, {name}! How are you? Make it one sentence.`,
+      prompt: `You are a friendly AI assistant. Create a warm, personal greeting for the user based on their memories. Make it feel natural and conversational. Here are the user's memories for context: ${memories.map(memory => memory.content).join(', ')} Very short and concise. e.g. "Hey! How are you? Make it one sentence.`,
     })
 
     return NextResponse.json({ greeting: text })
