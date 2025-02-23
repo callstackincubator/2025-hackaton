@@ -387,7 +387,7 @@ export async function getMemories({ user_id }: { user_id: string }) {
       .select()
       .from(memory)
       .where(eq(memory.user_id, user_id)); // for the curennt user
-
+    console.warn('memories', memories);
     return memories;
   } catch (error) {
     console.log(error);
@@ -432,6 +432,7 @@ export async function getVoice(voice_id: string): Promise<Array<Voice>> {
   try {
     return await db.select().from(voice).where(eq(voice.voice_id, voice_id));
   } catch (error) {
+    console.log('error', error);
     console.error("Failed to get voice from database");
     throw error;
   }

@@ -11,8 +11,6 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
     const memories = await getMemories({ user_id: session.user.id })
-    console.log('asdf', memories.map(memory => memory.content));
-    console.log(memories);
     
     const { text } = await generateText({
       model: myProvider.languageModel('default'),

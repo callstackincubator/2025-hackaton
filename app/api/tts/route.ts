@@ -1,10 +1,14 @@
 import { getLatestVoice } from "@/lib/db/queries"
+import { auth } from "@/app/(auth)/auth"
 import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   try {
     const { text, voice } = await request.json()
-    const latestVoice = await getLatestVoice()
+    const session = await auth();
+    const user_id = session?.user?.id ?? "";
+    const latestVoice = await getLatestVoice(user_id)
+    console.log('latestVoice', latestVoice)
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${latestVoice?.voice_id ?? voice}`, {
       method: "POST",
       headers: {
