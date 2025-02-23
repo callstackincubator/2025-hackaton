@@ -9,7 +9,7 @@ import Image from "next/image";
 
 import { ChatHeader } from "@/components/chat-header";
 import type { Vote } from "@/lib/db/schema";
-import { fetcher, generateUUID } from "@/lib/utils";
+import { cn, fetcher, generateUUID } from "@/lib/utils";
 
 import { Artifact } from "./artifact";
 import { MultimodalInput } from "./multimodal-input";
@@ -42,44 +42,47 @@ export function Chat({
   useEffect(() => {
     const fetchGreeting = async () => {
       if (initialLoadRef.current && messages.length === 0) {
-        initialLoadRef.current = false
+        initialLoadRef.current = false;
         try {
-          const response = await fetch('/api/greeting')
-          if (!response.ok) throw new Error('Failed to fetch greeting')
-          
-          const data = await response.json()
+          const response = await fetch("/api/greeting");
+          if (!response.ok) throw new Error("Failed to fetch greeting");
+
+          const data = await response.json();
 
           append({
             id: generateUUID(),
             content: data.greeting,
             role: "assistant",
-          })
+          });
 
-          const audioResponse = await fetch('/api/tts', {
+          const audioResponse = await fetch("/api/tts", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ text: data.greeting, voice: "21m00Tcm4TlvDq8ikWAM" }), // TODO: make this dynamic, replace with the voice of the user
+            body: JSON.stringify({
+              text: data.greeting,
+              voice: "21m00Tcm4TlvDq8ikWAM",
+            }),
           });
           // call tts
           const audioBlob = await audioResponse.blob();
           const url = URL.createObjectURL(audioBlob);
           setAudioUrl(url);
-          
+
           // Play audio immediately
           if (audioRef.current) {
             audioRef.current.src = url;
           }
         } catch (error) {
-          console.error('Error fetching greeting:', error)
-          toast.error('Failed to generate greeting')
+          console.error("Error fetching greeting:", error);
+          toast.error("Failed to generate greeting");
         }
       }
-    }
+    };
 
-    fetchGreeting()
-  }, [])
+    fetchGreeting();
+  }, []);
 
   const {
     messages,
@@ -105,9 +108,12 @@ export function Chat({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text: message.content, voice: "21m00Tcm4TlvDq8ikWAM" }), // TODO: make this dynamic, replace with the voice of the user
+        body: JSON.stringify({
+          text: message.content,
+          voice: "21m00Tcm4TlvDq8ikWAM",
+        }), // TODO: make this dynamic, replace with the voice of the user
       });
-      
+
       if (!response.ok) {
         console.error(response);
         toast.error("Failed to generate speech");
@@ -117,18 +123,18 @@ export function Chat({
       const audioBlob = await response.blob();
       const url = URL.createObjectURL(audioBlob);
       setAudioUrl(url);
-      
+
       // Play audio immediately
       if (audioRef.current) {
         audioRef.current.src = url;
-        audioRef.current.play().catch(e => {
+        audioRef.current.play().catch((e) => {
           console.error("Audio playback failed:", e);
           toast.error("Failed to play audio");
         });
       }
     },
     onError: (error) => {
-      console.log(error)
+      console.log(error);
       // toast.error("An error occurred, please try again!");
     },
   });
@@ -156,7 +162,6 @@ export function Chat({
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background">
-        
         <ChatHeader
           chatId={id}
           selectedModelId={selectedChatModel}
@@ -164,72 +169,80 @@ export function Chat({
           isReadonly={isReadonly}
         />
 
-        <audio 
-          ref={audioRef} 
+        <audio
+          ref={audioRef}
           className="hidden" // Hide the audio element but keep it in the DOM
           onError={() => toast.error("Audio playback failed")}
         />
 
         <div className="flex flex-col h-full">
           {showJourney ? (
-          <div className="flex flex-col justify-center items-center h-full">
-            <Image src="/logo_landing.png" alt="Logo" width={200} height={200} />
-            <JourneyButton text="Press to start!" onClick={() => {
-              if (audioRef.current) {
-                audioRef.current.play().catch(e => {
-                  console.error("Audio playback failed:", e);
-                  toast.error("Failed to play audio");
-                });
-              }
-              setTimeout(() => {
-                setShowJourney(false);
-              }, audioRef.current?.duration || 0);
-            }}/>
-          </div>
+            <div className="flex flex-col justify-center items-center h-full">
+              <Image
+                src="/logo_landing.png"
+                alt="Logo"
+                width={200}
+                height={200}
+              />
+              <JourneyButton
+                text="Press to start!"
+                onClick={() => {
+                  if (audioRef.current) {
+                    audioRef.current.play().catch((e) => {
+                      console.error("Audio playback failed:", e);
+                      toast.error("Failed to play audio");
+                    });
+                  }
+                  setTimeout(() => {
+                    setShowJourney(false);
+                  }, audioRef.current?.duration || 0);
+                }}
+              />
+            </div>
           ) : (
             <>
-          {messages.length > 0 ? (
-            <>
-              <Messages
-                chatId={id}
-                isLoading={isLoading}
-                votes={votes}
-                messages={messages}
-                setMessages={setMessages}
-                reload={reload}
-                isReadonly={isReadonly}
-                isArtifactVisible={isArtifactVisible}
-              />
-              <div className="flex justify-center items-center mt-4 mb-4">
+              {messages.length > 0 && (
+                <>
+                  <Messages
+                    chatId={id}
+                    isLoading={isLoading}
+                    votes={votes}
+                    messages={messages}
+                    setMessages={setMessages}
+                    reload={reload}
+                    isReadonly={isReadonly}
+                    isArtifactVisible={isArtifactVisible}
+                  />
+                </>
+              )}
+              <div
+                className={cn(
+                  "flex justify-center items-center",
+                  messages.length > 0 ? "mt-4 mb-4" : "h-full"
+                )}
+              >
                 <ListeningMicButton append={append} />
               </div>
+              <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
+                {!isReadonly && (
+                  <MultimodalInput
+                    chatId={id}
+                    input={input}
+                    setInput={setInput}
+                    handleSubmit={handleSubmit}
+                    isLoading={isLoading}
+                    stop={stop}
+                    attachments={attachments}
+                    setAttachments={setAttachments}
+                    messages={messages}
+                    setMessages={setMessages}
+                    append={append}
+                  />
+                )}
+              </form>
             </>
-          ) : (
-            <div className="flex justify-center items-center h-full">
-              <ListeningMicButton append={append} />
-            </div>
-          )}
-        <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
-          {!isReadonly && (
-            <MultimodalInput
-              chatId={id}
-              input={input}
-              setInput={setInput}
-              handleSubmit={handleSubmit}
-              isLoading={isLoading}
-              stop={stop}
-              attachments={attachments}
-              setAttachments={setAttachments}
-              messages={messages}
-              setMessages={setMessages}
-              append={append}
-            />
-          )}
-        </form>
-          </>
           )}
         </div>
-
       </div>
 
       <Artifact
@@ -251,5 +264,3 @@ export function Chat({
     </>
   );
 }
-
-
