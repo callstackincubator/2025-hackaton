@@ -27,7 +27,7 @@ export const updateMemory = (userId: string, chatId: string) => {
             const success = await updateMemoryDB({memoryId, newMemory: new_memory, category })
           
               if(success) {
-                return "Memory updated"
+                return `Memory updated: ${new_memory}`
               } else {
                 return "Couldn't update memory"
               }

@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const createMemory = (userId: string, chatId: string) => {
   return tool({
-    description: "Save a new memory or a fact bout your friend.",
+    description: "Save a new memory or a fact about your friend.",
     parameters: z.object({
       memory_description: z.string(),
       category: z
@@ -31,7 +31,7 @@ export const createMemory = (userId: string, chatId: string) => {
       });
 
       if (success) {
-        return "Memory created";
+        return `Saved a memory: ${memory_description}`;
       } else {
         return "Couldn't create memory";
       }
