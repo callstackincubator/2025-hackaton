@@ -8,7 +8,7 @@ export const removeMemory = tool({
       memory_id: z.string(),
     }),
     execute: async ({ memory_id }) => {
-      // Retrieve existing memories
+          // Remove existing memory
           const success = await deleteMemory({memoryId: memory_id})
       
           if(success) {
