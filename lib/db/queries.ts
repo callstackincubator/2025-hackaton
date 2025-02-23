@@ -437,11 +437,21 @@ export async function getVoice(voice_id: string): Promise<Array<Voice>> {
   }
 }
 
-export async function getLatestVoice(): Promise<Voice | undefined> {
+export async function getVoiceForUser(user_id: string): Promise<Array<Voice>> {
+  try {
+    return await db.select().from(voice).where(eq(voice.user_id, user_id));
+  } catch (error) {
+    console.error("Failed to get voice for user from database");
+    throw error;
+  }
+}
+
+export async function getLatestVoice(user_id: string): Promise<Voice | undefined> {
   try {
     const [latestVoice] = await db
       .select()
       .from(voice)
+      .where(eq(voice.user_id, user_id))
       .orderBy(desc(voice.created_at))
       .limit(1);
     return latestVoice;
@@ -467,9 +477,12 @@ export async function saveVoice(voice_id: string): Promise<Array<Voice>> {
   }
 }
 
-export async function deleteVoice(voice_id: string) {
+export async function deleteVoicesForUser(user_id: string) {
   try {
-    await db.delete(voice).where(eq(voice.voice_id, voice_id));
+    // remove all voices for this user id
+    await db.delete(voice)
+      .where(eq(voice.user_id, user_id));
+    
     return true;
   } catch (error) {
     console.error("Failed to delete voice from database");

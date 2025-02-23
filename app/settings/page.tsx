@@ -3,11 +3,30 @@
 import { Settings } from 'lucide-react';
 import { ReactMediaRecorder } from "react-media-recorder";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from 'sonner';
+
+type Voice = {
+  voice_id: string;
+  created_at: string;
+}
 
 export default function SettingsPage() {
-  const [voiceId, setVoiceId] = React.useState(null);
-  const [uploading, setUploading] = React.useState(false);
+  const [voice, setVoice] = useState<Voice | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  // Fetch existing voice on component mount
+  useEffect(() => {
+    fetch('/api/get-voice')
+    .then(res => res.json())
+    .then(data => {
+      setVoice(data);
+    })
+    .catch(err => {
+      console.log('error', err);
+      console.log('no voice id found');
+    });
+  }, []);
 
   const uploadToElevenLabs = async (blobUrl: any) => {
     setUploading(true);
@@ -22,10 +41,16 @@ export default function SettingsPage() {
         method: "POST",
         body: formData,
       });
+      
       const data = await response.json();
-      setVoiceId(data.voice_id);
+
+      setVoice({
+        voice_id: data.voice_id,
+        created_at: new Date().toISOString(),
+      });
+      toast.success('Voice uploaded successfully');
     } catch (error) {
-      console.error("Upload error:", error);
+      toast.error('Failed to upload voice');
     } finally {
       setUploading(false);
     }
@@ -67,6 +92,40 @@ export default function SettingsPage() {
         <p className="text-gray-600 dark:text-gray-300">
           Personalize your interaction by adding a custom voice for Mirror.ai responses.
         </p>
+          {voice?.voice_id && (
+            <div className="flex items-center justify-between p-4 border rounded-lg bg-card">
+              <div className="flex gap-6 text-sm text-purple-600">
+                <span>Current Voice ID: {voice.voice_id}</span>
+                <span>Created at: {new Date(voice.created_at).toLocaleString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}</span>
+              </div>
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={() => {
+                  fetch('/api/remove-voice', {
+                    method: 'POST',
+                    body: JSON.stringify({ voice_id: voice.voice_id }),
+                  })
+                  .then(res => res.json())
+                  .then(data => {
+                    setVoice(null);
+                  })
+                  .catch(err => {
+                    console.log('error', err);
+                    toast.error('Failed to delete voice');
+                  });
+                }}
+              >
+                Delete Voice
+              </Button>
+            </div>
+          )}
         
         <div className="p-6 rounded-lg border bg-card">
           <ReactMediaRecorder
@@ -107,12 +166,6 @@ export default function SettingsPage() {
                       {uploading ? "Uploading..." : "Upload Voice"}
                     </Button>
                   </div>
-                )}
-                
-                {voiceId && (
-                  <p className="text-sm text-green-600">
-                    Voice ID: {voiceId}
-                  </p>
                 )}
               </div>
             )}
