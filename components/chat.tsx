@@ -49,6 +49,12 @@ export function Chat({
           
           const data = await response.json()
 
+          append({
+            id: generateUUID(),
+            content: data.greeting,
+            role: "assistant",
+          })
+
           const audioResponse = await fetch('/api/tts', {
             method: "POST",
             headers: {
@@ -122,7 +128,8 @@ export function Chat({
       }
     },
     onError: (error) => {
-      toast.error("An error occurred, please try again!");
+      console.log(error)
+      // toast.error("An error occurred, please try again!");
     },
   });
 

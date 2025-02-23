@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     const session = await auth();
     const user_id = session?.user?.id ?? "";
     const latestVoice = await getLatestVoice(user_id)
-    console.log('latestVoice', latestVoice)
+
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${latestVoice?.voice_id ?? voice}`, {
       method: "POST",
       headers: {
